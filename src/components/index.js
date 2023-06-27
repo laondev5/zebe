@@ -1,4 +1,5 @@
 import NavBar from "./NavBar";
+import ProtectedRoute from "./ProtectedRoute";
 
 
-export {NavBar}
+export {NavBar, ProtectedRoute}

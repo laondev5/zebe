@@ -1,14 +1,19 @@
 import React, {useState,} from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../assets'
 import { EyeClose, EyeOpen } from '../assets/icons'
 import { useFormik } from 'formik';
 import { loginSchema } from '../schemas';
+import GoogleButton from 'react-google-button';
+import {useUserAuth} from '../context/UserContext'
 
 
 const Login = () => {
 const [showPassword, setShowPassword] = useState(false)
 const [passwordType, setPsswordType]=useState('password')
+const [error, setError] = useState("")
+const navigate = useNavigate()
+const {login, goodleSignin} = useUserAuth()
 const handleShowPassword = ()=>{
   setShowPassword(!showPassword)
   if(showPassword === true){
@@ -20,6 +25,15 @@ const handleShowPassword = ()=>{
 
   }
 }
+const handleGoogleSignin = async (e)=>{
+  e.preventDefault();
+  try{
+    await goodleSignin();
+    navigate('/')
+  }catch(err){
+    console.log(err)
+  }
+}
 const {values, handleBlur, handleChange, touched, handleSubmit, errors} = useFormik({
   initialValues: {
     name: '',
@@ -27,8 +41,15 @@ const {values, handleBlur, handleChange, touched, handleSubmit, errors} = useFor
     password: '',
   },
   validationSchema: loginSchema,
-  onSubmit: values => {
-    alert(JSON.stringify(values, null, 2));
+  onSubmit: async(values) => {
+    setError("")
+    const {email, password} = values
+    try{
+      await login(email, password)
+      navigate("/")
+    }catch(err){
+      console.log(err.message)
+    }
   },
 });
 // console.log(errors)
@@ -92,6 +113,10 @@ const {values, handleBlur, handleChange, touched, handleSubmit, errors} = useFor
                       >Sign in</button>
                   </div>
                 </form>
+                <div className='w-[100%] flex flex-col justify-center items-center'>
+                  <p className='mb-2'>OR SIGN UP WITH</p>
+                  <GoogleButton className='w-[100%]' onClick={handleGoogleSignin}/>
+                </div>
             </div>
         </div>
       </div>

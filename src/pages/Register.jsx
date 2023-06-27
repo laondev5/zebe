@@ -1,13 +1,17 @@
 import React, {useState,} from 'react'
-import { Link } from 'react-router-dom'
+import { Link , useNavigate} from 'react-router-dom'
 import { register } from '../assets'
 import { EyeClose, EyeOpen } from '../assets/icons'
 import { useFormik } from 'formik';
 import { registerSchema } from '../schemas';
+import {useUserAuth} from '../context/UserContext'
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [passwordType, setPsswordType]=useState('password')
+  const [error, setError] = useState('')
+  const {signUp} = useUserAuth()
+  const navigate = useNavigate()
   const handleShowPassword = ()=>{
     setShowPassword(!showPassword)
     if(showPassword === true){
@@ -27,8 +31,16 @@ const Register = () => {
       confirmPassword:'',
     },
     validationSchema: registerSchema,
-    onSubmit: values => {
-      alert(JSON.stringify(values, null, 2));
+    onSubmit: async(values) => {
+      setError('')
+      const {email, password} = values
+      try{
+        await signUp(email, password)
+        navigate("/login");
+      }catch(err){
+        console.log(err.message)
+      }
+      console.log(email);
     },
   });
   return (
@@ -41,7 +53,7 @@ const Register = () => {
             <div className='flex flex-col justify-center items-center'>
                 <div className='mb-10'>
                   <h1 className='text-center font-extrabold text-blue-500 text-[40px]'>Sign up</h1>
-                  <p className='text-center  text-gray-500 text-[14px]'>Please sign up or <Link to='/' className='text-blue-500 font-bold'>Login</Link></p>
+                  <p className='text-center  text-gray-500 text-[14px]'>Please sign up or <Link to='/login' className='text-blue-500 font-bold'>Login</Link></p>
                 </div>
                 <form onSubmit={handleSubmit} className=' w-[100%]'>
                   <div className='my-2'>
